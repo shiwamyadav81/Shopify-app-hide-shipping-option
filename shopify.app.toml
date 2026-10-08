@@ -2,7 +2,7 @@
 
 client_id = "d342abcc39a969915e437aebe1a6c849"
 name = "app-hide-shipping-option"
-application_url = "https://example.com"
+application_url = "https://shopify-app-hide-shipping-option.onrender.com"
 embedded = true
 
 [build]
@@ -18,6 +18,5 @@ api_version = "2027-01"
 scopes = "write_delivery_customizations,read_delivery_customizations,write_products"
 
 [auth]
-redirect_urls = [ "https://example.com/api/auth" ]
-
+redirect_urls = [ "https://shopify-app-hide-shipping-option.onrender.com/auth/callback" ]
 
