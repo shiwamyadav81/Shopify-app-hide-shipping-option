@@ -1,0 +1,20 @@
+api_version = "2026-10"
+
+[[extensions]]
+name = "shipping-hider-function"
+handle = "shipping-hider-function"
+type = "function"
+uid = "f767463f-8ba3-602e-223d-90a439ffda26a11bc5aa"
+description = "Hide shipping options at checkout"
+
+  [[extensions.targeting]]
+  target = "cart.delivery-options.transform.run"
+  input_query = "src/cart_delivery_options_transform_run.graphql"
+
+  [extensions.build]
+  command = ""
+  path = "dist/function.wasm"
+
+  [extensions.ui.paths]
+  create = "/"
+  details = "/"

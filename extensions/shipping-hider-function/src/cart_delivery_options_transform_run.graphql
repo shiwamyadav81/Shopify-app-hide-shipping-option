@@ -1,0 +1,28 @@
+query RunInput {
+  cart {
+    cost {
+      subtotalAmount {
+        amount
+      }
+    }
+    deliveryGroups {
+      deliveryOptions {
+        handle
+        title
+        code
+        cost {
+          amount
+        }
+      }
+    }
+  }
+  deliveryCustomization {
+    metafield(
+      namespace: "$app:shipping-hider-function"
+      key: "function-configuration"
+    ) {
+      jsonValue
+      value
+    }
+  }
+}
