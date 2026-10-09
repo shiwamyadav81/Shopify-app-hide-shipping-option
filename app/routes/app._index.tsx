@@ -37,15 +37,18 @@ function customizationForThisFunction(nodes: DeliveryCustomizationNode[]) {
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { session, admin, billing } = await authenticate.admin(request);
 
+  const isTestBilling =
+    process.env.NODE_ENV !== "production" ||
+    session.shop === "app-check-store-cnxiyewx.myshopify.com";
 
   // Enforce active subscription
   const billingCheck = await billing.require({
     plans: [MONTHLY_PLAN],
-    isTest: process.env.NODE_ENV !== "production", // Set to true during dev testing
+    isTest: isTestBilling,
     onFailure: async () => {
       return billing.request({
         plan: MONTHLY_PLAN,
-        isTest: process.env.NODE_ENV !== "production",
+        isTest: isTestBilling,
       });
     },
   });
