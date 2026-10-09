@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
-import { useActionData, useLoaderData, useSubmit, useNavigation } from "react-router";
+import { useFetcher, useLoaderData } from "react-router";
 import {
   Page,
   Layout,
@@ -30,8 +30,36 @@ type DeliveryCustomizationNode = {
   metafield?: { jsonValue?: HideConfig | null } | null;
 };
 
+type SaveError = { message: string; field?: string[] | null };
+type GraphqlPayload = {
+  errors?: { message: string }[];
+  data?: Record<
+    string,
+    { userErrors?: SaveError[]; deliveryCustomization?: { id: string } | null } | null
+  >;
+};
+
 function customizationForThisFunction(nodes: DeliveryCustomizationNode[]) {
   return nodes.find((node) => node.shopifyFunction?.handle === FUNCTION_HANDLE) || null;
+}
+
+async function readMutationResult(
+  response: Response,
+  mutationName: string,
+): Promise<{ success: boolean; errors: SaveError[] }> {
+  const result = (await response.json()) as GraphqlPayload;
+  const errors = [
+    ...(result.errors || []),
+    ...(result.data?.[mutationName]?.userErrors || []),
+  ];
+
+  if (!response.ok) {
+    errors.push({ message: `Shopify API request failed (${response.status}).` });
+  } else if (!result.data?.[mutationName]?.deliveryCustomization) {
+    errors.push({ message: "Shopify did not return a saved shipping rule." });
+  }
+
+  return { success: errors.length === 0, errors };
 }
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
@@ -42,7 +70,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     session.shop === "app-check-store-cnxiyewx.myshopify.com";
 
   // Enforce active subscription
-  const billingCheck = await billing.require({
+  await billing.require({
     plans: [MONTHLY_PLAN],
     isTest: isTestBilling,
     onFailure: async () => {
@@ -157,9 +185,10 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         }
       );
 
-      const createJson = await createResponse.json();
-      const errors = createJson.data?.deliveryCustomizationCreate?.userErrors || [];
-      return { success: errors.length === 0, errors };
+      return await readMutationResult(
+        createResponse,
+        "deliveryCustomizationCreate",
+      );
     } else {
       const updateResponse = await admin.graphql(
         `#graphql
@@ -193,9 +222,10 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         }
       );
 
-      const updateJson = await updateResponse.json();
-      const errors = updateJson.data?.deliveryCustomizationUpdate?.userErrors || [];
-      return { success: errors.length === 0, errors };
+      return await readMutationResult(
+        updateResponse,
+        "deliveryCustomizationUpdate",
+      );
     }
   } catch (error) {
     console.error("Action error:", error);
@@ -214,9 +244,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 export default function Index() {
   
   const loaderData = useLoaderData<typeof loader>();
-  const actionData = useActionData<typeof action>();
-  const submit = useSubmit();
-  const navigation = useNavigation();
+  const fetcher = useFetcher<typeof action>();
+  const actionData = fetcher.data;
 
   const shopHandle = loaderData?.shopHandle || "";
   const customizations = loaderData?.customizations || [];
@@ -230,7 +259,7 @@ export default function Index() {
   const [keywords, setKeywords] = useState(initialKeywords);
   const [minSubtotal, setMinSubtotal] = useState(String(initialMinSubtotal));
 
-  const isSaving = navigation.state === "submitting";
+  const isSaving = fetcher.state !== "idle";
 
   const handleSave = () => {
     const parsedAmount = Number(minSubtotal);
@@ -240,7 +269,10 @@ export default function Index() {
       return;
     }
 
-    submit({ hideKeywords: keywords, minSubtotal: String(parsedAmount) }, { method: "post" });
+    fetcher.submit(
+      { hideKeywords: keywords, minSubtotal: String(parsedAmount) },
+      { method: "post" },
+    );
   };
 
   return (
