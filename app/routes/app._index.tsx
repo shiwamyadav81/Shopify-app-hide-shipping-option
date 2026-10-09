@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type {
   ActionFunctionArgs,
   HeadersFunction,
@@ -271,8 +271,17 @@ export default function Index() {
 
   const [keywords, setKeywords] = useState(initialKeywords);
   const [minSubtotal, setMinSubtotal] = useState(String(initialMinSubtotal));
+  const [successDismissed, setSuccessDismissed] = useState(false);
 
   const isSaving = fetcher.state !== "idle";
+
+  useEffect(() => {
+    if (!actionData?.success) return;
+
+    const timeoutId = window.setTimeout(() => setSuccessDismissed(true), 5000);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [actionData]);
 
   const handleSave = () => {
     const parsedAmount = Number(minSubtotal);
@@ -282,6 +291,7 @@ export default function Index() {
       return;
     }
 
+    setSuccessDismissed(false);
     fetcher.submit(
       { hideKeywords: keywords, minSubtotal: String(parsedAmount) },
       { method: "post" },
@@ -293,8 +303,12 @@ export default function Index() {
       <Layout>
         <Layout.Section>
           <BlockStack gap="500">
-            {actionData?.success && (
-              <Banner title="Configuration saved successfully!" tone="success" />
+            {actionData?.success && !successDismissed && !isSaving && (
+              <Banner
+                title="Configuration saved successfully!"
+                tone="success"
+                onDismiss={() => setSuccessDismissed(true)}
+              />
             )}
             {actionData?.errors && actionData.errors.length > 0 && (
               <Banner title="Failed to save configuration" tone="critical">
