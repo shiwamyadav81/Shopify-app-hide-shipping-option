@@ -21,9 +21,10 @@ export default function App() {
   return (
     <div className={styles.index}>
       <div className={styles.content}>
-        <h1 className={styles.heading}>A short heading about [your app]</h1>
+        <h1 className={styles.heading}>Shipping Option Hider</h1>
         <p className={styles.text}>
-          A tagline about [your app] that describes your value proposition.
+          Configure checkout delivery rules to hide shipping options by name
+          when the cart subtotal is above an amount you choose.
         </p>
         {showForm && (
           <Form className={styles.form} method="post" action="/auth/login">
@@ -37,20 +38,28 @@ export default function App() {
             </button>
           </Form>
         )}
-        <ul className={styles.list}>
+        <ul className={styles.list} aria-label="App features">
           <li>
-            <strong>Product feature</strong>. Some detail about your feature and
-            its benefit to your customer.
+            <strong>Match shipping options.</strong> Enter comma-separated
+            keywords to match delivery option names or codes.
           </li>
           <li>
-            <strong>Product feature</strong>. Some detail about your feature and
-            its benefit to your customer.
+            <strong>Set a subtotal threshold.</strong> Rules apply only when the
+            cart subtotal is above your configured amount.
           </li>
           <li>
-            <strong>Product feature</strong>. Some detail about your feature and
-            its benefit to your customer.
+            <strong>Keep checkout usable.</strong> If every delivery option
+            matches, the least expensive option remains available.
           </li>
         </ul>
+        <p>
+          7-day free trial, then $4.99 USD every 30 days.
+        </p>
+        <p>
+          <a href="/privacy">Privacy policy</a>
+          {" · "}
+          <a href="mailto:shiwamyadav81@gmail.com">Contact support</a>
+        </p>
       </div>
     </div>
   );
