@@ -9,7 +9,11 @@ embedded = true
 automatically_update_urls_on_dev = true
 
 [webhooks]
-api_version = "2027-01"
+api_version = "2025-10"
+
+[[webhooks.subscriptions]]
+compliance_topics = ["customers/data_request", "customers/redact", "shop/redact"]
+uri = "/webhooks"
 
 
 
@@ -19,4 +23,3 @@ scopes = "write_delivery_customizations,read_delivery_customizations,write_produ
 
 [auth]
 redirect_urls = [ "https://shopify-app-hide-shipping-option.onrender.com/auth/callback" ]
-
