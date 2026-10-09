@@ -1,6 +1,11 @@
 import { useState } from "react";
-import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
-import { useFetcher, useLoaderData } from "react-router";
+import type {
+  ActionFunctionArgs,
+  HeadersFunction,
+  LoaderFunctionArgs,
+} from "react-router";
+import { useFetcher, useLoaderData, useRouteError } from "react-router";
+import { boundary } from "@shopify/shopify-app-react-router/server";
 import {
   Page,
   Layout,
@@ -15,6 +20,14 @@ import {
   Badge,
 } from "@shopify/polaris";
 import { authenticate, MONTHLY_PLAN } from "../shopify.server";
+
+export function ErrorBoundary() {
+  return boundary.error(useRouteError());
+}
+
+export const headers: HeadersFunction = (headersArgs) => {
+  return boundary.headers(headersArgs);
+};
 
 const FUNCTION_HANDLE = "shipping-hider-function";
 const CONFIG_NAMESPACE = "$app:shipping-hider-function";
