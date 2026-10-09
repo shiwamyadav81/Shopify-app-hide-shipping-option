@@ -19,7 +19,7 @@ uri = "/webhooks"
 
 [access_scopes]
 # Include both read and write delivery customization scopes along with standard app scopes
-scopes = "write_delivery_customizations,read_delivery_customizations,write_products"
+scopes = "write_delivery_customizations,read_delivery_customizations"
 
 [auth]
 redirect_urls = [ "https://shopify-app-hide-shipping-option.onrender.com/auth/callback" ]
